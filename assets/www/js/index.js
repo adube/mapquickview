@@ -29,8 +29,8 @@ var app = {
     // Application Constructor
     initialize: function() {
         this.bindEvents();
-        this.baseLayers = {};
-        this.overlayLayers = {};
+        this.baseLayers = [];
+        this.overlayLayers = [];
     },
     // Bind Event Listeners
     //
@@ -62,31 +62,33 @@ var app = {
 
     createMap: function() {
         // initial base layers
-        app.baseLayers["OSM Standard"] = L.tileLayer(
-            'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
-            {
-                attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                    
-            }
-        );
-        app.baseLayers["OSM Cycle Map"] = L.tileLayer(
-            'http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',
-            {
-                attribution: 'Tiles courtesy of <a href="http://www.opencyclemap.org/" target="_blank">Andy Allan</a>'
-            }
-        );
+        app.baseLayers.push({
+            name: "OSM Standard",
+            layerObj: L.tileLayer(
+                'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+                {
+                    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+
+                }
+            )
+        });
+        app.baseLayers.push({
+            name: "OSM Cycle Map",
+            layerObj: L.tileLayer(
+                'http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',
+                {
+                    attribution: 'Tiles courtesy of <a href="http://www.opencyclemap.org/" target="_blank">Andy Allan</a>'
+                }
+            )
+        });
         
         app.map = new L.Map('map', {
             center: new L.LatLng(48.41, -71.09),
-            zoom: 13
+            zoom: 13,
+            layers: app.baseLayers[0].layerObj
         });
 
-        // only add the first layer to the layer object, add the others to the
-        $.each(app.baseLayers, function(name, layer) {
-            app.map.addLayer(layer);
-            app.currentBaseLayer = layer;
-            return false;
-        });
+        app.currentBaseLayer = app.baseLayers[0];
 
         // initialize the layer list
         app.initLayerList();
@@ -121,8 +123,8 @@ var app = {
                 text: "Base Layers"
             })
             .appendTo('#layerslist');
-        $.each(app.baseLayers, function(key, layer) {
-            app.addLayerToList(key, layer);
+        $.each(app.baseLayers, function(index, layer) {
+            app.addLayerToList(layer);
         });
 
         $('<li>', {
@@ -130,26 +132,24 @@ var app = {
                 text: "Overlay Layers"
             })
             .appendTo('#layerslist');
-        $.each(app.overlayLayers, function(key, layer) {
-            app.addLayerToList(key, layer);
+        $.each(app.overlayLayers, function(index, layer) {
+            app.addLayerToList(layer);
         });
         $('#layerslist').listview('refresh');
     },
 
-    addLayerToList: function(name, layer) {
+    addLayerToList: function(layer) {
         var item = $('<li>', {
                 "data-icon": "check",
-                "class": app.map.hasLayer(layer) ? "checked" : ""
+                "class": app.map.hasLayer(layer.layerObj) ? "checked" : ""
             })
             .append($('<a />', {
-                text: name
+                text: layer.name
             })
                 .click(function() {
                     $.mobile.changePage('#mappage');
-                    if (app.baseLayers[name]) {
-                        app.map.removeLayer(app.currentBaseLayer);
-                        app.map.addLayer(layer);
-                        app.currentBaseLayer = layer;
+                    if ($.inArray(layer, app.baseLayers)) {
+                        app.setBaseLayer(layer);
                     } else {
                         // todo...
                         //layer.setVisibility(!layer.getVisibility());
@@ -157,6 +157,8 @@ var app = {
                 })
             )
             .appendTo('#layerslist');
+
+        layer.$item = $(item);
     
         // todo - support this as well
         /*
@@ -168,7 +170,14 @@ var app = {
         */
     },
 
-    setBaseLayer: function(name, layer) {
-        
+    setBaseLayer: function(layer) {
+        // remove current base layer
+        app.map.removeLayer(app.currentBaseLayer.layerObj);
+        app.currentBaseLayer.$item.toggleClass('checked');
+
+        // set new base layer
+        app.map.addLayer(layer.layerObj);
+        layer.$item.toggleClass('checked');
+        app.currentBaseLayer = layer;
     }
 };
