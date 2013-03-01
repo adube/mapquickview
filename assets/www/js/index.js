@@ -24,13 +24,10 @@ var app = {
 
     baseLayers: null,
 
-    overlayLayers: null,
-
     // Application Constructor
     initialize: function() {
         this.bindEvents();
         this.baseLayers = [];
-        this.overlayLayers = [];
     },
     // Bind Event Listeners
     //
@@ -47,6 +44,7 @@ var app = {
         //app.receivedEvent('deviceready');
         app.createMap();
         app.manageOrientation();
+        app.manageTMSAddition();
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
@@ -103,8 +101,6 @@ var app = {
     },
 
     fixContentHeight: function() {
-        console.log("ADUBE - fixContentHeight");
-
         var footer = $("div[data-role='footer']:visible"),
             content = $("div[data-role='content']:visible:visible"),
             viewHeight = $(window).height(),
@@ -127,14 +123,6 @@ var app = {
             app.addLayerToList(layer);
         });
 
-        $('<li>', {
-                "data-role": "list-divider",
-                text: "Overlay Layers"
-            })
-            .appendTo('#layerslist');
-        $.each(app.overlayLayers, function(index, layer) {
-            app.addLayerToList(layer);
-        });
         $('#layerslist').listview('refresh');
     },
 
@@ -148,26 +136,14 @@ var app = {
             })
                 .click(function() {
                     $.mobile.changePage('#mappage');
-                    if ($.inArray(layer, app.baseLayers)) {
-                        app.setBaseLayer(layer);
-                    } else {
-                        // todo...
-                        //layer.setVisibility(!layer.getVisibility());
-                    }
+                    app.setBaseLayer(layer);
                 })
             )
             .appendTo('#layerslist');
 
         layer.$item = $(item);
-    
-        // todo - support this as well
-        /*
-        layer.events.on({
-            'visibilitychanged': function() {
-                $(item).toggleClass('checked');
-            }
-        });
-        */
+
+        $('#layerslist').listview('refresh');
     },
 
     setBaseLayer: function(layer) {
@@ -179,5 +155,55 @@ var app = {
         app.map.addLayer(layer.layerObj);
         layer.$item.toggleClass('checked');
         app.currentBaseLayer = layer;
+    },
+
+    manageTMSAddition: function() {
+        // on 'confirm' click
+        $('#buttoninput-addtmslayer-confirm').click(function() {
+            app.addTMSLayer();
+        });
+
+        // on 'cancel' click
+        $('#buttoninput-addtmslayer-cancel').click(function() {
+            $.mobile.changePage('#mappage');
+        });
+
+        // on 'reset' click
+        $('#buttoninput-addtmslayer-reset').click(function() {
+            $('#textinput-addtmslayer-name')[0].value = "";
+            $('#textinput-addtmslayer-url')[0].value = "";
+        });
+
+        // on 'pink one example' click
+        $('#buttoninput-addtmslayer-pink').click(function() {
+            $('#textinput-addtmslayer-name')[0].value = "Color Pink";
+            $('#textinput-addtmslayer-url')[0].value = "http://cartalib.mapgears.com/mapcache/tms/1.0.0/colorpink_v1@g/{z}/{x}/{y}.png";
+        });
+    },
+
+    addTMSLayer: function() {
+        var name,
+            url,
+            layer;
+        name = $('#textinput-addtmslayer-name')[0].value;
+        url = $('#textinput-addtmslayer-url')[0].value;
+
+        if (name == "" || url == "") {
+            return;
+        }
+
+        layer = {
+            name: name,
+            layerObj: L.tileLayer(
+                url,
+                {
+                    tms: true
+                }
+            )
+        }
+        app.baseLayers.push(layer);
+        app.addLayerToList(layer);
+        app.setBaseLayer(layer);
+        $.mobile.changePage('#mappage');
     }
 };

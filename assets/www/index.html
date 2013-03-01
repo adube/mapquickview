@@ -44,8 +44,9 @@
         <div id="map"></div>
       </div>
       <div data-role="footer">
-        <a href="#searchpage" data-icon="search" data-role="button">Search</a>
-        <a href="#" id="locate" data-icon="locate" data-role="button">Locate</a>
+        <!--a href="#searchpage" data-icon="search" data-role="button">Search</a>
+        <a href="#" id="locate" data-icon="locate" data-role="button">Locate</a-->
+        <a href="#addtmslayerpage" data-icon="plus" data-role="button">Add TMS</a>
         <a href="#layerspage" data-icon="layers" data-role="button">Layers</a>
       </div>
     </div>
@@ -62,6 +63,45 @@
       </div>
     </div>
 
+  <!-- ADD TMS layer page -->
+    <div data-role="page" id="addtmslayerpage">
+      <div data-role="header">
+        <h1>Add a TMS Layer</h1>
+      </div>
+      <div data-role="content">
+        <div data-role="fieldcontain" class="addtmslayerpage-form">
+          <label for="textinput-addtmslayer-name">Name:</label>
+          <input type="text"
+                 name="textinput-addtmslayer-name"
+                 id="textinput-addtmslayer-name"
+                 placeholder="Name"
+                 value="" />
+          <label for="textinput-addtmslayer-url">URL:</label>
+          <input type="text"
+                 name="textinput-addtmslayer-url"
+                 id="textinput-addtmslayer-url"
+                 placeholder="URL"
+                 value="" />
+        </div>
+        <input id="buttoninput-addtmslayer-confirm"
+               type="button"
+               value="Confirm"
+               data-icon="plus"
+               data-theme="b" />
+        <input id="buttoninput-addtmslayer-cancel"
+               type="button"
+               value="Cancel"
+               data-theme="e" />
+        <input id="buttoninput-addtmslayer-reset"
+               type="button"
+               value="Reset"
+               data-icon="refresh" />
+        <input id="buttoninput-addtmslayer-pink"
+               type="button"
+               value="Color Pink (example)"
+               data-icon="star" />
+      </div>
+    </div>
 
     <script type="text/javascript"
             src="cordova-2.4.0.js"></script>
