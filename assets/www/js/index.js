@@ -17,6 +17,9 @@
  * under the License.
  */
 var app = {
+
+    map: null,
+
     // Application Constructor
     initialize: function() {
         this.bindEvents();
@@ -33,7 +36,8 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function() {
-        app.receivedEvent('deviceready');
+        //app.receivedEvent('deviceready');
+        app.createMap();
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
@@ -45,5 +49,20 @@ var app = {
         receivedElement.setAttribute('style', 'display:block;');
 
         console.log('Received Event: ' + id);
+    },
+
+    createMap: function() {
+        // map with default layers
+        app.map = new L.Map('map', {
+            center: new L.LatLng(48.41, -71.09),
+            zoom: 13
+        }).addLayer(
+            L.tileLayer(
+                'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+                {
+                    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                }
+            )
+        );
     }
 };
