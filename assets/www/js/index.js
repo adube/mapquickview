@@ -16,6 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+// Start with the map page
+window.location.replace(window.location.href.split("#")[0] + "#");
+
 var app = {
 
     map: null,
@@ -44,6 +48,7 @@ var app = {
 
     onDocumentReady: function() {
         console.log("document ready!");
+
         app.createMap();
         app.manageOrientation();
         app.manageTMSAddition();
