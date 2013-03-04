@@ -35,16 +35,22 @@ var app = {
     // 'load', 'deviceready', 'offline', and 'online'.
     bindEvents: function() {
         document.addEventListener('deviceready', this.onDeviceReady, false);
+        $(document).ready(this.onDocumentReady);
     },
+
+    onDocumentReady: function() {
+        console.log("document ready!");
+        app.createMap();
+        app.manageOrientation();
+        app.manageTMSAddition();
+    },
+
     // deviceready Event Handler
     //
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function() {
-        //app.receivedEvent('deviceready');
-        app.createMap();
-        app.manageOrientation();
-        app.manageTMSAddition();
+        console.log("device ready!");
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
