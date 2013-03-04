@@ -232,19 +232,33 @@ var app = {
         // on 'pink one example' click
         $('#buttoninput-addtmslayer-pink').click(function() {
             $('#textinput-addtmslayer-name')[0].value = "Color Pink";
-            $('#textinput-addtmslayer-url')[0].value = "http://cartalib.mapgears.com/mapcache/tms/1.0.0/colorpink_v1@g/{z}/{x}/{y}.png";
+            $('#textinput-addtmslayer-url')[0].value = "http://cartalib.mapgears.com/mapcache/tms/1.0.0/colorpink_v1@g/";
         });
     },
 
     addTMSLayer: function() {
         var name,
             url,
-            layer;
+            layer,
+            urlPattern;
         name = $('#textinput-addtmslayer-name')[0].value;
         url = $('#textinput-addtmslayer-url')[0].value;
 
         if (name == "" || url == "") {
             return;
+        }
+
+        // ajust url if incomplete
+        urlPattern = new RegExp("/{z}/{x}/{y}.[\w]+$");
+        if (!urlPattern.test(url)) {
+            var v = [url];
+            urlPattern = new RegExp("/$");
+            if (!urlPattern.test(url)) {
+                v.push("/");
+            }
+            v.push("{z}/{x}/{y}.png");
+            $('#textinput-addtmslayer-url')[0].value = v.join("");
+            url = $('#textinput-addtmslayer-url')[0].value;
         }
 
         layer = {
