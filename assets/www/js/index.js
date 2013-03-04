@@ -24,6 +24,10 @@ var app = {
 
     baseLayers: null,
 
+    currentTimer: null,
+
+    deleteMouseDownDelay: 1000,
+
     // Application Constructor
     initialize: function() {
         this.bindEvents();
@@ -140,10 +144,50 @@ var app = {
             .append($('<a />', {
                 text: layer.name
             })
-                .click(function() {
-                    $.mobile.changePage('#mappage');
-                    app.setBaseLayer(layer);
+                // standard mouse events
+                .mousedown(function() {
+                    if (!app.currentTimer) {
+                        app.currentTimer = window.setTimeout(function() {
+                            console.log("delete!");
+                            app.deleteTMSLayer(layer);
+                            app.currentTimer = null;
+                        }, app.deleteMouseDownDelay);
+                    }
                 })
+
+                .mouseup(function() {
+                    if (app.currentTimer) {
+                        window.clearTimeout(app.currentTimer);
+                        app.currentTimer = null;
+                        $.mobile.changePage('#mappage');
+                        app.setBaseLayer(layer);
+                        return false;
+                    }
+                })
+
+                // touch events
+                .bind("touchstart", function() {
+                    if (!app.currentTimer) {
+                        app.currentTimer = window.setTimeout(function() {
+                            console.log("delete on touch!");
+                            app.deleteTMSLayer(layer);
+                            app.currentTimer = null;
+                        }, app.deleteMouseDownDelay);
+                    }
+                })
+
+                .bind("touchend", function() {
+                    console.log("touchend");
+                    if (app.currentTimer) {
+                        window.clearTimeout(app.currentTimer);
+                        app.currentTimer = null;
+                        $.mobile.changePage('#mappage');
+                        app.setBaseLayer(layer);
+                        return false;
+                    }
+                })
+
+
             )
             .appendTo('#layerslist');
 
@@ -211,5 +255,42 @@ var app = {
         app.addLayerToList(layer);
         app.setBaseLayer(layer);
         $.mobile.changePage('#mappage');
+    },
+
+    deleteTMSLayer: function(layerToDelete) {      
+        var index,
+            msg = [];
+
+        // do not delete anything if we only have one layer left
+        if (app.baseLayers.length <= 1) {
+            return;
+        }
+
+        // confirm deletion
+        var msg = [];
+        msg.push('Delete "');
+        msg.push(layerToDelete.name);
+        msg.push('" layer?')
+        if (!confirm(msg.join(""))) {
+            return;
+        }
+
+        // if layer is currently on the map, we must pick an other one
+        if (app.map.hasLayer(layerToDelete.layerObj)) {
+            $.each(app.baseLayers, function(index, layer) {
+                if (layer.layerObj != layerToDelete.layerObj) {
+                    app.setBaseLayer(layer);
+                    return false;
+                }   
+            });
+        }
+
+        // remove from local layer array
+        index = $.inArray(layerToDelete, app.baseLayers);
+        app.baseLayers.splice(index, 1);
+
+        // TODO: remove from database
+
+        layerToDelete.$item.remove();
     }
 };
