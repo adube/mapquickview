@@ -1,6 +1,9 @@
 .ui-content {
     padding: 0;
 }
+.ui-content-original {
+    padding: 15px;
+}
 .ui-footer {
     text-align: center;
     padding: 5px 0;
@@ -35,4 +38,14 @@
 }
 #details-list li{
 	padding:15px 10px;
+}
+.ui-field-contain .ui-controlgroup-controls {
+    width: 100%;
+}
+.ui-field-contain .ui-controlgroup-controls,
+.ui-field-contain input.ui-input-text, 
+.ui-field-contain textarea.ui-input-text, 
+.ui-field-contain .ui-input-search,
+.ui-field-contain div.ui-input-text {
+    width: 100%;
 }

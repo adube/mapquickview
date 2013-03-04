@@ -46,7 +46,7 @@
       <div data-role="footer">
         <div class="ui-grid-a">
           <div class="ui-block-a">
-            <a href="#addtmslayerpage" data-icon="plus"
+            <a href="#addtmslayerpage" data-icon="cross"
                data-theme="b" data-role="button">Add TMS</a>
           </div>
           <div class="ui-block-b">
@@ -62,7 +62,7 @@
       <div data-role="header">
         <h1>Layers</h1>
       </div>
-      <div data-role="content">
+      <div data-role="content" class="ui-content-original">
         <ul data-role="listview" data-inset="true" data-theme="d"
             data-dividertheme="c" id="layerslist">
         </ul>
@@ -74,38 +74,49 @@
       <div data-role="header">
         <h1>Add a TMS Layer</h1>
       </div>
-      <div data-role="content">
-        <div data-role="fieldcontain" class="addtmslayerpage-form">
-          <label for="textinput-addtmslayer-name">Name:</label>
-          <input type="text"
-                 name="textinput-addtmslayer-name"
-                 id="textinput-addtmslayer-name"
-                 placeholder="Name"
+      <div data-role="content" class="ui-content-original">
+        <div data-role="fieldcontain">
+          <fieldset data-role="controlgroup">
+            <label for="textinput-addtmslayer-name">Name:</label>
+            <input type="text"
+                   name=""
+                   id="textinput-addtmslayer-name"
+                   placeholder="Name"
+                   value="" />
+          </fieldset>
+          <fieldset data-role="controlgroup">
+            <label for="textinput-addtmslayer-url">URL:</label>
+            <input type="url"
+                   name=""
+                   id="textinput-addtmslayer-url"
+                   placeholder="URL"
                  value="" />
-          <label for="textinput-addtmslayer-url">URL:</label>
-          <input type="text"
-                 name="textinput-addtmslayer-url"
-                 id="textinput-addtmslayer-url"
-                 placeholder="URL"
-                 value="" />
+          </fieldset>
         </div>
-        <input id="buttoninput-addtmslayer-confirm"
-               type="button"
-               value="Confirm"
-               data-icon="plus"
-               data-theme="b" />
-        <input id="buttoninput-addtmslayer-cancel"
-               type="button"
-               value="Cancel"
-               data-theme="e" />
-        <input id="buttoninput-addtmslayer-reset"
-               type="button"
-               value="Reset"
-               data-icon="refresh" />
-        <input id="buttoninput-addtmslayer-pink"
-               type="button"
-               value="Color Pink (example)"
-               data-icon="star" />
+        <div class="ui-grid-a">
+          <div class="ui-block-a">
+            <input id="buttoninput-addtmslayer-confirm"
+                   type="button"
+                   value="Confirm"
+                   data-icon="cross"
+                   data-theme="b" />
+            <input id="buttoninput-addtmslayer-cancel"
+                   type="button"
+                   value="Cancel"
+                   data-icon="delete"
+                   data-theme="e" />
+          </div>
+          <div class="ui-block-b">
+            <input id="buttoninput-addtmslayer-reset"
+                   type="button"
+                   value="Reset"
+                   data-icon="refresh" />
+            <input id="buttoninput-addtmslayer-pink"
+                   type="button"
+                   value="Color Pink (example)"
+                   data-icon="star" />
+          </div>
+        </div>
       </div>
     </div>
 
