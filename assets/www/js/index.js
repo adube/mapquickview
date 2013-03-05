@@ -105,11 +105,13 @@ var app = {
             layers: JSON.stringify([{
                 "name": "OSM Standard",
                 "url": "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
-                "attribution": '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                "attribution": '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+                "tms": false
             }, {
                 "name": "OSM Cycle Map",
                 "url": "http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png",
-                "attribution": 'Tiles courtesy of <a href="http://www.opencyclemap.org/" target="_blank">Andy Allan</a>'
+                "attribution": 'Tiles courtesy of <a href="http://www.opencyclemap.org/" target="_blank">Andy Allan</a>',
+                "tms": false
             }]),
             x: 48.41,
             y: -71.09,
@@ -120,6 +122,7 @@ var app = {
 
     savePreferences: function(pref) {
         pref = pref || {};
+        console.log("mqvjs - save preferences: " + JSON.stringify(pref));
         $.each(pref, function(key, value) {
             app.preference.set(key, value, function() {
                 if (typeof value == "object") {
@@ -130,6 +133,29 @@ var app = {
                 console.log("mqvjs - preferences '" + key + "' not set.");
             });
         });
+    },
+
+    saveBaseLayers: function() {
+        var layers = [],
+            layer;
+
+        if (!app.isMobileDevice) {
+            console.log("mqvjs - device is not a mobile - layers not saved");
+            return;
+        }
+        
+        $.each(app.baseLayers, function(index, baseLayer) {
+            layer = {
+                name: baseLayer.name,
+                url: baseLayer.layerObj._url,
+                tms: baseLayer.layerObj.options.tms
+            };
+            if (baseLayer.layerObj.options.attribution) {
+                layer.attribution = baseLayer.layerObj.options.attribution;
+            }
+            layers.push(layer);
+        });
+        app.savePreferences({layers: layers});
     },
 
     resetPreferences: function() {
@@ -172,7 +198,9 @@ var app = {
         }
 
         $.each(JSON.parse(pref.layers), function(index, layer) {
-            options = {};
+            options = {
+                tms: layer.tms
+            };
             if (layer.attribution) {
                 options.attribution = layer.attribution;
             }
@@ -368,6 +396,9 @@ var app = {
         app.addLayerToList(layer);
         app.setBaseLayer(layer);
         $.mobile.changePage('#mappage');
+
+        // save 'layers' changes (only) to preferences
+        app.saveBaseLayers();
     },
 
     deleteTMSLayer: function(layerToDelete) {      
@@ -402,8 +433,9 @@ var app = {
         index = $.inArray(layerToDelete, app.baseLayers);
         app.baseLayers.splice(index, 1);
 
-        // TODO: remove from database
-
         layerToDelete.$item.remove();
+
+        // save 'layers' changes (only) to preferences
+        app.saveBaseLayers();
     }
 };
