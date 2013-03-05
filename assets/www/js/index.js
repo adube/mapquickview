@@ -158,6 +158,16 @@ var app = {
         app.savePreferences({layers: layers});
     },
 
+    saveCurrentBaseLayer: function() {
+        if (!app.isMobileDevice) {
+            console.log(
+                "mqvjs - device is not aaaa mobile - current base layer not saved"
+            );
+            return;
+        }
+        app.savePreferences({currentlayer: app.currentBaseLayer.name});
+    },
+
     resetPreferences: function() {
         app.savePreferences({
             x: "",
@@ -332,6 +342,9 @@ var app = {
         app.map.addLayer(layer.layerObj);
         layer.$item.toggleClass('checked');
         app.currentBaseLayer = layer;
+
+        // save 'currentlayer' to preferences
+        app.saveCurrentBaseLayer();
     },
 
     manageTMSAddition: function() {
