@@ -22,21 +22,28 @@ window.location.replace(window.location.href.split("#")[0] + "#");
 
 var app = {
 
-    map: null,
+    baseLayers: null,
 
     currentBaseLayer: null,
-
-    baseLayers: null,
 
     currentTimer: null,
 
     deleteMouseDownDelay: 1000,
 
+    isMobileDevice: false,
+
+    map: null,
+
+    preference: null,
+
     // Application Constructor
     initialize: function() {
         this.bindEvents();
+        this.detectUserAgent();
         this.baseLayers = [];
+        this.preference = window.plugins.applicationPreference;
     },
+
     // Bind Event Listeners
     //
     // Bind any events that are required on startup. Common events are:
@@ -46,10 +53,20 @@ var app = {
         $(document).ready(this.onDocumentReady);
     },
 
+    detectUserAgent: function() {
+        app.isMobileDevice = (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(
+            navigator.userAgent)) ? true : false;
+    },
+
     onDocumentReady: function() {
         console.log("document ready!");
 
-        app.createMap();
+        // if not on a mobile device, create the map right away with the
+        // default (and static) preferences. On a mobile device, the preferences
+        // are loaded first, then the map is created
+        if (!app.isMobileDevice) {
+            app.createMap(app.getDefaultPreferences());
+        }
         app.manageOrientation();
         app.manageTMSAddition();
     },
@@ -60,7 +77,78 @@ var app = {
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function() {
         console.log("device ready!");
+        app.loadPreferences();
     },
+
+    loadPreferences: function() {
+        // reset - for dev debug use only
+        // app.resetPreferences();
+
+        app.preference.load(function(pref) {
+            pref = pref || {};
+            console.log("mqvjs - preferences: " + JSON.stringify(pref));
+            // if no layers were found in preferences, get default ones and
+            // save them
+            if (!pref.layers) {
+                console.log("mqvjs - no preferences found, use default");
+                pref = app.getDefaultPreferences();
+                app.savePreferences(pref);
+            }
+            app.createMap(pref);
+        }, function() {
+            console.log("mqvjs - error, preferences not loaded");
+        });
+    },
+
+    getDefaultPreferences: function() {
+        return {
+            layers: JSON.stringify([{
+                "name": "OSM Standard",
+                "url": "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
+                "attribution": '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            }, {
+                "name": "OSM Cycle Map",
+                "url": "http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png",
+                "attribution": 'Tiles courtesy of <a href="http://www.opencyclemap.org/" target="_blank">Andy Allan</a>'
+            }]),
+            x: 48.41,
+            y: -71.09,
+            z: 13,
+            currentlayer: "OSM Standard"
+        };
+    },
+
+    savePreferences: function(pref) {
+        pref = pref || {};
+        $.each(pref, function(key, value) {
+            app.preference.set(key, value, function() {
+                if (typeof value == "object") {
+                    value = JSON.stringify(value);
+                }
+                console.log("mqvjs - preferences '" + key + "' set.");
+            }, function() {
+                console.log("mqvjs - preferences '" + key + "' not set.");
+            });
+        });
+    },
+
+    resetPreferences: function() {
+        app.savePreferences({
+            x: "",
+            y: "",
+            z: "",
+            currentlayer: "",
+            layers: ""
+        });
+
+        // load
+        app.preference.load(function(value) {
+            console.log("mqvjs - preferences: " + JSON.stringify(value))
+        }, function() {
+            console.log("mqvjs - error, preferences not loaded");
+        });
+    },
+
     // Update DOM on a Received Event
     receivedEvent: function(id) {
         var parentElement = document.getElementById(id);
@@ -73,35 +161,41 @@ var app = {
         console.log('Received Event: ' + id);
     },
 
-    createMap: function() {
-        // initial base layers
-        app.baseLayers.push({
-            name: "OSM Standard",
-            layerObj: L.tileLayer(
-                'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
-                {
-                    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    createMap: function(pref) {
+        var options,
+            currentLayer,
+            baseLayer;
+        pref = pref || {};
 
-                }
-            )
-        });
-        app.baseLayers.push({
-            name: "OSM Cycle Map",
-            layerObj: L.tileLayer(
-                'http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png',
-                {
-                    attribution: 'Tiles courtesy of <a href="http://www.opencyclemap.org/" target="_blank">Andy Allan</a>'
-                }
-            )
+        if (app.map || !pref.layers) {
+            return;
+        }
+
+        $.each(JSON.parse(pref.layers), function(index, layer) {
+            options = {};
+            if (layer.attribution) {
+                options.attribution = layer.attribution;
+            }
+            baseLayer = {
+                name: layer.name,
+                layerObj: L.tileLayer(layer.url, options)
+            };
+            app.baseLayers.push(baseLayer);
+
+            if (layer.name == pref.currentlayer) {
+                app.currentBaseLayer = baseLayer;
+            }
         });
         
+        if (!app.currentBaseLayer) {
+            app.currentBaseLayer = app.baseLayers[0];
+        }
+        
         app.map = new L.Map('map', {
-            center: new L.LatLng(48.41, -71.09),
-            zoom: 13,
-            layers: app.baseLayers[0].layerObj
+            center: new L.LatLng(pref.x, pref.y),
+            zoom: pref.z,
+            layers: app.currentBaseLayer.layerObj
         });
-
-        app.currentBaseLayer = app.baseLayers[0];
 
         // initialize the layer list
         app.initLayerList();
