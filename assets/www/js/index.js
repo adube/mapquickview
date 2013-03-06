@@ -32,6 +32,10 @@ var app = {
 
     isMobileDevice: false,
 
+    isTracking: false,
+
+    locationLayers: null,
+
     map: null,
 
     preference: null,
@@ -41,6 +45,7 @@ var app = {
         this.bindEvents();
         this.detectUserAgent();
         this.baseLayers = [];
+        this.locationLayers = [];
         this.preference = window.plugins.applicationPreference;
     },
 
@@ -69,6 +74,7 @@ var app = {
         }
         app.manageOrientation();
         app.manageTMSAddition();
+        app.manageLocateTool();
     },
 
     // deviceready Event Handler
@@ -237,6 +243,35 @@ var app = {
 
         // initialize the layer list
         app.initLayerList();
+
+        // listen to "location" found event
+        app.map.on('locationfound', function(e) {
+            var circle, 
+                marker,
+                radius,
+                text = [];
+
+            radius = e.accuracy / 2;
+
+            console.log("mqvjs - locationfound - isTracking:" + app.isTracking);
+
+            // (1) clear old location stuff
+            app.clearLocationLayers();
+
+            // (2) add marker layer
+            text.push("You are within ");
+            text.push(radius);
+            text.push(" meters from this point");
+            marker = L.marker(e.latlng);
+            marker.addTo(app.map)
+                .bindPopup(text.join("")).openPopup();
+            app.locationLayers.push(marker);
+
+            // (3) add circle layer
+            circle = L.circle(e.latlng, radius);
+            circle.addTo(app.map);
+            app.locationLayers.push(circle);
+        });
     },
 
     manageOrientation: function() {
@@ -355,7 +390,7 @@ var app = {
 
         // on 'cancel' click
         $('#buttoninput-addtmslayer-cancel').click(function() {
-            $.mobile.changePage('#mappage');
+            $.mobile.changePage('#layerspage');
         });
 
         // on 'reset' click
@@ -450,5 +485,61 @@ var app = {
 
         // save 'layers' changes (only) to preferences
         app.saveBaseLayers();
+    },
+
+    manageLocateTool: function() {
+        // manage "locate" button clicks
+        $("#locate").on('click', function() {
+            if (app.trackingEnabled()) {
+                if (app.isTracking) {
+                    app.stopTracking();
+                } else {
+                    app.startTracking();
+                }
+            } else {
+                app.map.locate({setView: true});
+            }
+        });
+        // manage "track" slider changes
+        $("#track").on('change', function() {
+            app.setTrackingButtonText(
+                $(this).val() == "on" ? "Start" : "Locate"
+            );
+        });
+        // check original slider value
+        app.setTrackingButtonText(
+            app.trackingEnabled() ? "Start" : "Locate"
+        );
+    },
+
+    trackingEnabled: function() {
+        return $("#track").val() == "on" ? true : false;
+    },
+
+    startTracking: function() {
+        console.log("mqvjs - start tracking");
+        app.setTrackingButtonText("Stop");
+        app.isTracking = true;
+        app.map.locate({setView: true, watch: true, maximumAge: 3000});
+    },
+
+    stopTracking: function() {
+        console.log("mqvjs - stop tracking");
+        app.setTrackingButtonText("Start");
+        app.isTracking = false;
+        app.map.stopLocate();
+        app.clearLocationLayers();
+    },
+
+    clearLocationLayers: function() {
+        $.each(app.locationLayers, function(index, layer) {
+            app.map.removeLayer(layer);
+        });
+        app.locationLayers = [];
+    },
+
+    setTrackingButtonText: function(text) {
+        $("#locate").find('.ui-btn-text')[0].innerHTML = text;
     }
+
 };

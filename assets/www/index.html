@@ -44,12 +44,18 @@
         <div id="map"></div>
       </div>
       <div data-role="footer">
-        <div class="ui-grid-a">
+        <div class="ui-grid-b">
           <div class="ui-block-a">
-            <a href="#addtmslayerpage" data-icon="cross"
-               data-theme="b" data-role="button">Add TMS</a>
+            <select name="track" id="track" data-theme="b" data-role="slider">
+              <option value="off">Locate</option>
+              <option value="on">Track</option>
+            </select> 
           </div>
           <div class="ui-block-b">
+            <a id="locate" href="#" data-icon="locate"
+               data-theme="b" data-role="button">Locate</a>
+          </div>
+          <div class="ui-block-c">
             <a href="#layerspage" data-icon="layers"
                data-theme="b" data-role="button">Layers</a>
           </div>
@@ -63,6 +69,9 @@
         <h1>Layers</h1>
       </div>
       <div data-role="content" class="ui-content-original">
+        <a href="#addtmslayerpage" data-icon="cross"
+           data-theme="b" data-role="button">Add TMS</a>
+
         <ul data-role="listview" data-inset="true" data-theme="d"
             data-dividertheme="c" id="layerslist">
         </ul>
@@ -127,7 +136,7 @@
     <script type="text/javascript"
             src="lib/jquery/jquery.mobile-1.3.0.min.js"></script>
     <script type="text/javascript"
-            src="lib/leaflet/dist/leaflet.js"></script>
+            src="lib/leaflet/dist/leaflet-src.js"></script>
 
     <script type="text/javascript" charset="utf-8"
             src="js/applicationPreferences.js"></script>

@@ -49,3 +49,6 @@
 .ui-field-contain div.ui-input-text {
     width: 100%;
 }
+div.ui-slider-switch {
+    width: 90%;
+}
