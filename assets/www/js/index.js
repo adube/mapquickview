@@ -272,6 +272,16 @@ var app = {
             circle.addTo(app.map);
             app.locationLayers.push(circle);
         });
+
+        app.map.on('locationerror', function(e) {
+            console.log(
+                "mqvjs - locationerror code: " +
+                e.code +
+                ", message: " +
+                e.message
+            );
+        });
+
     },
 
     manageOrientation: function() {
